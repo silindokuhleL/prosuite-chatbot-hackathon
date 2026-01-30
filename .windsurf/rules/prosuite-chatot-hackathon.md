@@ -17,7 +17,51 @@
 
 ---
 
-## 2. Project Structure
+## 2. Single Source of Truth (CRITICAL)
+
+### JSON IS THE SYSTEM
+
+All system data comes from one JSON structure (`src/data/prosuite-data.json`):
+
+| Data Category | Examples |
+|--------------|----------|
+| **Modules** | Risk, Asset, Incident, Audit, Compliance, Governance, Performance |
+| **Users** | User accounts, roles, permissions |
+| **Entities** | Risks, Assets, Incidents, Audit Engagements |
+| **Statuses** | Risk statuses, Asset statuses, Incident statuses |
+| **Lookups** | Categories, Departments, Sites, Locations |
+| **Relationships** | Risk controls, Incident tasks, Audit findings |
+
+### Forbidden
+- ❌ No hardcoded data in components
+- ❌ No duplicated configs across files
+- ❌ No fake mock data or placeholder content
+- ❌ No inline arrays/objects that should come from JSON
+
+### Required
+- ✅ Everything is derived from JSON via `src/lib/data.ts`
+- ✅ JSON drives UI rendering, navigation, and logic
+- ✅ JSON powers AI context generation
+- ✅ Types in `src/types/` must match JSON structure
+
+### Data Access Pattern
+```typescript
+// ✅ Correct - Use data accessor functions
+import { getRisks, getUser, getDepartment } from '@/lib/data';
+
+const risks = getRisks();
+const user = getUser(risk.owner_id);
+
+// ❌ Wrong - Hardcoded data
+const statuses = ['Open', 'Closed', 'Pending'];
+
+// ❌ Wrong - Direct JSON import in components
+import data from '@/data/prosuite-data.json';
+```
+
+---
+
+## 3. Project Structure
 
 ```
 src/
@@ -39,7 +83,7 @@ src/
 
 ---
 
-## 3. Component Rules
+## 4. Component Rules
 
 ### Global Components (`src/components`)
 - **ui/**: shadcn/ui components ONLY - do not modify
@@ -54,7 +98,7 @@ src/
 
 ---
 
-## 4. Type System Rules
+## 5. Type System Rules
 
 ### Centralized Types
 - All types live in `src/types/`
@@ -77,7 +121,7 @@ const user: { name: string; id: number } = {}
 
 ---
 
-## 5. Import Order (Enforced)
+## 6. Import Order (Enforced)
 
 ```typescript
 // 1. React
@@ -110,7 +154,7 @@ import type { Message, ChatSession } from "@/types"
 
 ---
 
-## 6. Page Structure (App Router)
+## 7. Page Structure (App Router)
 
 ### Pages should be thin composition layers:
 
@@ -136,7 +180,7 @@ export default function ChatPage() {
 
 ---
 
-## 7. Styling Rules
+## 8. Styling Rules
 
 ### Tailwind Only
 ```typescript
@@ -156,7 +200,7 @@ import { cn } from "@/lib/utils"
 
 ---
 
-## 8. Data Fetching
+## 9. Data Fetching
 
 ### Use Services Layer
 ```typescript
@@ -177,7 +221,7 @@ import { getChatHistory } from "@/services/chatbot"
 
 ---
 
-## 9. Configuration
+## 10. Configuration
 
 ### Use config files for static data
 ```typescript
@@ -196,7 +240,7 @@ export const CHATBOT_CONFIG = {
 
 ---
 
-## 10. Naming Conventions
+## 11. Naming Conventions
 
 | Item | Convention | Example |
 |------|-----------|---------|
@@ -209,7 +253,7 @@ export const CHATBOT_CONFIG = {
 
 ---
 
-## 11. Code Quality
+## 12. Code Quality
 
 ### General Rules
 - Write clean, readable code
@@ -225,7 +269,7 @@ export const CHATBOT_CONFIG = {
 
 ---
 
-## 12. Loading States (Suspense Pattern)
+## 13. Loading States (Suspense Pattern)
 
 ### Rules
 - ❌ **NO spinner loaders** - spinners are forbidden
@@ -310,7 +354,7 @@ src/app/risk/
 
 ---
 
-## 13. Git Workflow
+## 14. Git Workflow
 
 - Use descriptive commit messages
 - Keep commits atomic and focused
