@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icons';
-import { Badge } from '@/components/ui/badge';
 import { ActionConfirmCard } from './action-confirm-card';
 import { VoiceWaveform } from './voice-waveform';
 import { GhostSuggestions } from './ghost-suggestions';
+import { SmartVisualizer } from './smart-visualizer';
 import { ModuleKey, MODULE_SUGGESTIONS } from '@/lib/ai/config';
 
 interface Message {
@@ -210,7 +210,7 @@ export function ChatInterface({ module = 'risk', context, onClose, isOpen = true
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Badge className="bg-white/20 text-white text-xs">{module}</Badge>
+          <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">{module}</span>
           {onClose && (
             <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20">
               <Icon name="x" size={18} />
@@ -244,7 +244,13 @@ export function ChatInterface({ module = 'risk', context, onClose, isOpen = true
                   : 'bg-white text-gray-800 shadow-sm border rounded-bl-sm'
               }`}
             >
-              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              {message.role === 'assistant' ? (
+                <div className="text-sm prose prose-sm max-w-none">
+                  <SmartVisualizer content={message.content} module={module} />
+                </div>
+              ) : (
+                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              )}
               <p className={`text-xs mt-1 ${message.role === 'user' ? 'text-white/70' : 'text-gray-400'}`}>
                 {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
