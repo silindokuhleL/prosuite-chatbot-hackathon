@@ -1,6 +1,7 @@
 // AI Chat API Route
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import prosuiteData from '@/data/prosuite-data.json';
 
 // Validate API key exists
 const apiKey = process.env.OPENAI_API_KEY;
@@ -11,6 +12,124 @@ if (!apiKey) {
 const openai = new OpenAI({
   apiKey: apiKey || '',
 });
+
+// Build data context for AI from JSON
+function buildDataContext(module?: string) {
+  const data = prosuiteData as Record<string, unknown>;
+  
+  // Extract key data for AI context
+  const risks = (data.risk as Record<string, unknown>)?.risks as unknown[] || [];
+  const assets = (data.asset as Record<string, unknown>)?.assets as unknown[] || [];
+  const incidents = (data.incident as Record<string, unknown>)?.incidents as unknown[] || [];
+  const auditFindings = (data.audit as Record<string, unknown>)?.audit_findings as unknown[] || [];
+  const compliancePackages = (data.compliance as Record<string, unknown>)?.compliance_packages as unknown[] || [];
+  const policies = (data.governance as Record<string, unknown>)?.governance_policies as unknown[] || [];
+  const users = (data.core as Record<string, unknown>)?.users as unknown[] || [];
+  const departments = (data.core as Record<string, unknown>)?.departments as unknown[] || [];
+
+  // Calculate summary metrics
+  const totalAssetValue = assets.reduce((sum: number, a) => sum + ((a as Record<string, unknown>).cost as number || 0), 0);
+  
+  // Format data for prompt
+  let contextData = `
+## LIVE PROSUITE DATA (use this to answer questions)
+
+### Summary Metrics
+- Total Risks: ${risks.length}
+- Total Assets: ${assets.length} (Total Value: R ${totalAssetValue.toLocaleString()})
+- Active Incidents: ${incidents.length}
+- Audit Findings: ${auditFindings.length}
+- Compliance Packages: ${compliancePackages.length}
+- Policies: ${policies.length}
+
+### Users
+${users.map((u: unknown) => {
+  const user = u as Record<string, unknown>;
+  return `- ${user.name} (ID: ${user.id}, Email: ${user.email})`;
+}).join('\n')}
+
+### Departments
+${departments.map((d: unknown) => {
+  const dept = d as Record<string, unknown>;
+  return `- ${dept.name} (ID: ${dept.id})`;
+}).join('\n')}
+`;
+
+  // Add module-specific detailed data
+  if (!module || module === 'asset') {
+    contextData += `
+### Asset Details
+| ID | Description | Asset Tag | Category | Cost | Status | Location |
+|----|-------------|-----------|----------|------|--------|----------|
+${assets.slice(0, 15).map((a: unknown) => {
+  const asset = a as Record<string, unknown>;
+  return `| ${asset.id} | ${asset.description} | ${asset.assetTag} | ${asset.category_name} | R ${(asset.cost as number)?.toLocaleString()} | ${asset.assetStatus_name} | ${asset.site_name} |`;
+}).join('\n')}
+`;
+  }
+
+  if (!module || module === 'risk') {
+    contextData += `
+### Risk Details
+| ID | Title | Category | Priority | Status | Owner |
+|----|-------|----------|----------|--------|-------|
+${risks.slice(0, 15).map((r: unknown) => {
+  const risk = r as Record<string, unknown>;
+  return `| ${risk.id} | ${risk.title} | ${risk.category_id} | ${risk.priority_id} | ${risk.is_archived ? 'Archived' : 'Active'} | User ${risk.owner_id} |`;
+}).join('\n')}
+`;
+  }
+
+  if (!module || module === 'incident') {
+    contextData += `
+### Incident Details
+| ID | Title | Type | Severity | Status | Assigned To |
+|----|-------|------|----------|--------|-------------|
+${incidents.slice(0, 15).map((i: unknown) => {
+  const incident = i as Record<string, unknown>;
+  return `| ${incident.id} | ${incident.title} | ${incident.type_id} | ${incident.severity_level_id} | ${incident.status_id} | User ${incident.assignee_id} |`;
+}).join('\n')}
+`;
+  }
+
+  if (!module || module === 'compliance') {
+    contextData += `
+### Compliance Packages
+| ID | Name | Score | Total Reqs | Completed | Overdue | Status |
+|----|------|-------|------------|-----------|---------|--------|
+${compliancePackages.slice(0, 10).map((c: unknown) => {
+  const pkg = c as Record<string, unknown>;
+  return `| ${pkg.id} | ${pkg.name} | ${pkg.compliance_score}% | ${pkg.total_requirements} | ${pkg.completed_requirements} | ${pkg.overdue_requirements} | ${pkg.compliance_package_status_id} |`;
+}).join('\n')}
+`;
+  }
+
+  if (!module || module === 'governance') {
+    contextData += `
+### Policies
+| ID | Title | Version | Status | Owner | Review Date |
+|----|-------|---------|--------|-------|-------------|
+${policies.slice(0, 10).map((p: unknown) => {
+  const policy = p as Record<string, unknown>;
+  return `| ${policy.id} | ${policy.title} | ${policy.version} | ${policy.policy_status_id} | User ${policy.owner_id} | ${policy.next_review_date} |`;
+}).join('\n')}
+`;
+  }
+
+  if (!module || module === 'audit') {
+    contextData += `
+### Audit Findings
+| ID | Title | Engagement | Risk Rating | Status | Due Date |
+|----|-------|------------|-------------|--------|----------|
+${auditFindings.slice(0, 10).map((f: unknown) => {
+  const finding = f as Record<string, unknown>;
+  return `| ${finding.id} | ${finding.title} | ${finding.engagement_id} | ${finding.risk_rating_id} | ${finding.status_id} | ${finding.due_date} |`;
+}).join('\n')}
+`;
+  }
+
+  return contextData;
+}
 
 const SYSTEM_PROMPT = `You are ProSuite AI, an intelligent enterprise GRC (Governance, Risk, and Compliance) assistant.
 
@@ -80,7 +199,10 @@ export async function POST(request: NextRequest) {
 
     const { messages, module, context } = await request.json();
 
-    const moduleContext = module ? `\n\nCurrent Module: ${module}\nContext: ${JSON.stringify(context || {})}` : '';
+    // Build data context from JSON - THIS IS THE KEY FIX
+    const dataContext = buildDataContext(module);
+    const moduleInfo = module ? `\n\nCurrent Module: ${module}\nAdditional Context: ${JSON.stringify(context || {})}` : '';
+    const fullSystemPrompt = SYSTEM_PROMPT + dataContext + moduleInfo;
 
     // Use gpt-4o-mini as default (gpt-5-mini doesn't exist)
     const model = process.env.OPENAI_MODEL === 'gpt-5-mini' ? 'gpt-4o-mini' : (process.env.OPENAI_MODEL || 'gpt-4o-mini');
@@ -88,7 +210,7 @@ export async function POST(request: NextRequest) {
     const response = await openai.chat.completions.create({
       model,
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT + moduleContext },
+        { role: 'system', content: fullSystemPrompt },
         ...messages,
       ],
       max_tokens: parseInt(process.env.OPENAI_MAX_TOKENS || '4000'),

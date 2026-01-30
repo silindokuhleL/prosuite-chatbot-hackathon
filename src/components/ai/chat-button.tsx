@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icons';
 import { ChatInterface } from './chat-interface';
 import { ModuleKey } from '@/lib/ai/config';
+import { useChatShortcuts } from '@/hooks/use-keyboard-shortcuts';
 
 interface ChatButtonProps {
   module?: ModuleKey;
@@ -33,10 +34,20 @@ function detectModuleFromPath(pathname: string): ModuleKey {
 export function ChatButton({ module: propModule, context }: ChatButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+
+  // Keyboard shortcuts
+  const handleOpenChat = useCallback(() => setIsOpen(true), []);
+  const handleCloseChat = useCallback(() => setIsOpen(false), []);
+  
+  useChatShortcuts({
+    onOpenChat: handleOpenChat,
+    onCloseChat: handleCloseChat,
+    isOpen
+  });
   
   // Auto-detect module from URL if not provided
   const detectedModule = detectModuleFromPath(pathname);
-  const module = propModule || detectedModule;
+  const activeModule = propModule || detectedModule;
 
   return (
     <>
@@ -63,7 +74,7 @@ export function ChatButton({ module: propModule, context }: ChatButtonProps) {
 
       {/* Chat Interface */}
       <ChatInterface 
-        module={module} 
+        module={activeModule} 
         context={context} 
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
