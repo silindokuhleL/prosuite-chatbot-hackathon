@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   BarChart,
   Bar,
@@ -52,6 +53,8 @@ interface RiskHeatmapChartProps {
 }
 
 export function RiskHeatmapChart({ data, title }: RiskHeatmapChartProps) {
+  const [hoveredCell, setHoveredCell] = useState<{ impact: string; likelihood: string; x: number; y: number } | null>(null);
+  
   const impacts = ['Catastrophic', 'Major', 'Moderate', 'Minor', 'Insignificant'];
   const likelihoods = ['Rare', 'Unlikely', 'Possible', 'Likely', 'Almost Certain'];
 
@@ -71,8 +74,10 @@ export function RiskHeatmapChart({ data, title }: RiskHeatmapChartProps) {
     return '#22c55e'; // Low - Green
   };
 
+  const hoveredData = hoveredCell ? getCell(hoveredCell.impact, hoveredCell.likelihood) : null;
+
   return (
-    <div className="my-4 p-4 bg-white rounded-lg border shadow-sm overflow-visible">
+    <div className="my-4 p-4 bg-white rounded-lg border shadow-sm overflow-visible relative">
       {title && <h4 className="text-sm font-semibold mb-3 text-gray-700">{title}</h4>}
       <div className="overflow-x-auto pb-2">
         <table className="w-full border-collapse text-[10px]">
@@ -93,11 +98,15 @@ export function RiskHeatmapChart({ data, title }: RiskHeatmapChartProps) {
                   const score = getRiskScore(iIdx, lIdx);
                   const color = getColor(score);
                   return (
-                    <td key={likelihood} className="p-0.5">
+                    <td key={likelihood} className="p-0.5 relative">
                       <div
-                        className="h-10 w-full rounded flex flex-col items-center justify-center text-white font-semibold cursor-pointer transition-transform hover:scale-105"
+                        className="h-10 w-full rounded flex flex-col items-center justify-center text-white font-semibold cursor-pointer transition-transform hover:scale-110 hover:z-10 hover:shadow-lg"
                         style={{ backgroundColor: color }}
-                        title={cell?.risks?.join(', ') || 'No risks'}
+                        onMouseEnter={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setHoveredCell({ impact, likelihood, x: rect.left, y: rect.top });
+                        }}
+                        onMouseLeave={() => setHoveredCell(null)}
                       >
                         <span className="text-sm">{cell?.count || 0}</span>
                       </div>
@@ -109,6 +118,41 @@ export function RiskHeatmapChart({ data, title }: RiskHeatmapChartProps) {
           </tbody>
         </table>
       </div>
+      
+      {/* Custom Tooltip */}
+      {hoveredCell && hoveredData && (
+        <div 
+          className="absolute z-50 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-xl max-w-[200px] pointer-events-none"
+          style={{ 
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)'
+          }}
+        >
+          <div className="font-semibold mb-1 text-violet-300">
+            {hoveredCell.impact} × {hoveredCell.likelihood}
+          </div>
+          <div className="text-gray-300 mb-2">
+            {hoveredData.count} risk{hoveredData.count !== 1 ? 's' : ''} in this zone
+          </div>
+          {hoveredData.risks && hoveredData.risks.length > 0 ? (
+            <ul className="space-y-1">
+              {hoveredData.risks.slice(0, 5).map((risk, idx) => (
+                <li key={idx} className="flex items-start gap-1">
+                  <span className="text-yellow-400">•</span>
+                  <span className="text-white">{risk}</span>
+                </li>
+              ))}
+              {hoveredData.risks.length > 5 && (
+                <li className="text-gray-400 italic">+{hoveredData.risks.length - 5} more...</li>
+              )}
+            </ul>
+          ) : (
+            <p className="text-gray-400 italic">No risks in this zone</p>
+          )}
+        </div>
+      )}
+      
       {/* Legend with proper spacing */}
       <div className="flex flex-wrap items-center justify-center gap-2 mt-4 pt-2 border-t text-[10px]">
         <span className="font-medium text-gray-500">Risk Level:</span>
