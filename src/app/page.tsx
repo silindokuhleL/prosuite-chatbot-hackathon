@@ -1,65 +1,139 @@
-import Image from "next/image";
+import { AppLayout } from '@/components/layout/app-layout';
+import { PageHeader } from '@/components/layout/header';
+import { MetricsGrid } from '@/components/dashboard/metrics-grid';
+import { ModuleWidget } from '@/components/dashboard/module-widget';
+import { RiskHeatmap } from '@/components/dashboard/risk-heatmap';
+import { RecentActivity } from '@/components/dashboard/recent-activity';
+import { getDashboardMetrics, getRisks, getAssets, getIncidents, getAuditEngagements, getCompliancePackages, getGovernancePolicies } from '@/lib/data';
+import { getEnabledModuleConfigs } from '@/lib/modules';
+import { getTenant } from '@/lib/data';
 
-export default function Home() {
+function getModuleStats(slug: string) {
+  switch (slug) {
+    case 'risk': {
+      const risks = getRisks();
+      return {
+        primary: { label: 'Total Risks', value: risks.length },
+        secondary: { label: 'Critical', value: risks.filter(r => r.inherit_risk_score >= 20).length },
+        items: risks.slice(0, 3).map(r => ({
+          id: r.id,
+          title: r.title,
+          status: r.inherit_risk_score >= 20 ? 'Critical' : r.inherit_risk_score >= 13 ? 'High' : 'Medium',
+          statusColor: r.inherit_risk_score >= 20 ? '#dc2626' : r.inherit_risk_score >= 13 ? '#f97316' : '#eab308',
+        })),
+      };
+    }
+    case 'asset': {
+      const assets = getAssets();
+      return {
+        primary: { label: 'Total Assets', value: assets.length },
+        secondary: { label: 'Active', value: assets.filter(a => a.assetStatus_id === 1).length },
+        items: assets.slice(0, 3).map(a => ({
+          id: a.id,
+          title: a.description,
+          status: a.assetStatus_name,
+          statusColor: a.assetStatus_id === 1 ? '#22c55e' : '#f97316',
+        })),
+      };
+    }
+    case 'incident': {
+      const incidents = getIncidents();
+      return {
+        primary: { label: 'Total Incidents', value: incidents.length },
+        secondary: { label: 'Open', value: incidents.filter(i => i.status_id !== 4).length },
+        items: incidents.slice(0, 3).map(i => ({
+          id: i.id,
+          title: i.title,
+          status: i.status_id === 1 ? 'New' : i.status_id === 2 ? 'Investigating' : 'Resolved',
+          statusColor: i.status_id === 1 ? '#3b82f6' : i.status_id === 2 ? '#f97316' : '#22c55e',
+        })),
+      };
+    }
+    case 'audit': {
+      const audits = getAuditEngagements();
+      return {
+        primary: { label: 'Engagements', value: audits.length },
+        secondary: { label: 'Active', value: audits.filter(a => a.status_id !== 4).length },
+        items: audits.slice(0, 3).map(a => ({
+          id: a.id,
+          title: a.title,
+          status: a.status_id === 1 ? 'Planning' : a.status_id === 2 ? 'Fieldwork' : 'Completed',
+          statusColor: a.status_id === 1 ? '#3b82f6' : a.status_id === 2 ? '#f97316' : '#22c55e',
+        })),
+      };
+    }
+    case 'compliance': {
+      const packages = getCompliancePackages();
+      const avgScore = packages.reduce((acc, p) => acc + p.compliance_score, 0) / packages.length;
+      return {
+        primary: { label: 'Packages', value: packages.length },
+        secondary: { label: 'Avg Score', value: `${Math.round(avgScore)}%` },
+        items: packages.slice(0, 3).map(p => ({
+          id: p.id,
+          title: p.name,
+          status: `${p.compliance_score}%`,
+          statusColor: p.compliance_score >= 80 ? '#22c55e' : p.compliance_score >= 60 ? '#eab308' : '#dc2626',
+        })),
+      };
+    }
+    case 'governance': {
+      const policies = getGovernancePolicies();
+      return {
+        primary: { label: 'Policies', value: policies.length },
+        secondary: { label: 'Approved', value: policies.filter(p => p.policy_status_id === 3).length },
+        items: policies.slice(0, 3).map(p => ({
+          id: p.id,
+          title: p.title,
+          status: p.policy_status_id === 3 ? 'Approved' : p.policy_status_id === 2 ? 'Review' : 'Draft',
+          statusColor: p.policy_status_id === 3 ? '#22c55e' : p.policy_status_id === 2 ? '#3b82f6' : '#6b7280',
+        })),
+      };
+    }
+    default:
+      return {
+        primary: { label: 'Items', value: 0 },
+      };
+  }
+}
+
+export default function DashboardPage() {
+  const tenant = getTenant();
+  const metrics = getDashboardMetrics();
+  const modules = getEnabledModuleConfigs().filter(m => m.slug !== 'performance');
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <AppLayout>
+      <PageHeader
+        title="Dashboard"
+        description={`Welcome to ${tenant?.tenant_name || 'ProSuite'} GRC Platform`}
+        breadcrumbs={[{ label: 'Home' }]}
+      />
+
+      <div className="space-y-6">
+        <MetricsGrid metrics={metrics} />
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <RiskHeatmap />
+          </div>
+          <div>
+            <RecentActivity />
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div>
+          <h2 className="mb-4 text-lg font-semibold">Module Overview</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {modules.map((module) => (
+              <ModuleWidget
+                key={module.slug}
+                module={module}
+                stats={getModuleStats(module.slug)}
+              />
+            ))}
+          </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
