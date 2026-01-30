@@ -15,6 +15,7 @@ import {
   ChevronRight,
   ChevronDown,
   ChevronLeft,
+  ChevronUp,
   Menu,
   X,
   Search,
@@ -63,6 +64,7 @@ import {
   MessageSquare,
   Handshake,
   Folder,
+  Save,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -135,6 +137,10 @@ export const Icons = {
   handshake: Handshake,
   folder: Folder,
   contact: Users,
+  chevronUp: ChevronUp,
+  eye: Eye,
+  trash: Trash2,
+  save: Save,
 } as const;
 
 export type IconName = keyof typeof Icons;
