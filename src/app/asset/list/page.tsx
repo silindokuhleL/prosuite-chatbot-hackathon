@@ -75,8 +75,10 @@ export default function AssetListPage() {
     loadData();
   }, []);
 
+  // Use simple formatting to avoid hydration mismatch between server/client
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(amount);
+    const formatted = amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return `R ${formatted}`;
   };
 
   const columns: Column<Asset>[] = [

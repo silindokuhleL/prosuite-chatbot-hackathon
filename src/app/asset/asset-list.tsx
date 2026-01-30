@@ -10,11 +10,10 @@ export function AssetList() {
   const router = useRouter();
   const assets = getAssets();
 
+  // Use simple formatting to avoid hydration mismatch between server/client
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-ZA', {
-      style: 'currency',
-      currency: 'ZAR',
-    }).format(value);
+    const formatted = value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return `R ${formatted}`;
   };
 
   const columns = [

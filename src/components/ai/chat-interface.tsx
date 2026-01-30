@@ -9,7 +9,9 @@ import { ActionConfirmCard } from './action-confirm-card';
 import { VoiceWaveform } from './voice-waveform';
 import { GhostSuggestions } from './ghost-suggestions';
 import { SmartVisualizer } from './smart-visualizer';
+import { QuickNavigation } from './quick-navigation';
 import { ModuleKey, MODULE_SUGGESTIONS } from '@/lib/ai/config';
+import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 
 interface Message {
   id: string;
@@ -34,29 +36,73 @@ interface ChatInterfaceProps {
   isOpen?: boolean;
 }
 
+// Detect navigation-related queries
+const isNavigationQuery = (text: string) => {
+  const navKeywords = ['navigate', 'navigation', 'go to', 'take me', 'open', 'where is', 'how do i find', 'show me', 'modules', 'menu'];
+  return navKeywords.some(keyword => text.toLowerCase().includes(keyword));
+};
+
 export function ChatInterface({ module = 'risk', context, onClose, isOpen = true }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isListening, setIsListening] = useState(false);
   const [pendingActions, setPendingActions] = useState<PendingAction[]>([]);
+  const [showNavigation, setShowNavigation] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Speech recognition hook
+  const {
+    isListening,
+    transcript,
+    interimTranscript,
+    isSupported: isSpeechSupported,
+    startListening,
+    stopListening,
+    resetTranscript,
+  } = useSpeechRecognition();
+
   const suggestions = MODULE_SUGGESTIONS[module] || [];
 
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Focus input when chat opens
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
     }
   }, [isOpen]);
 
+  // Update input with speech transcript
+  useEffect(() => {
+    if (transcript) {
+      setInput(transcript);
+    }
+  }, [transcript]);
+
+  // Auto-send when user stops speaking (after getting final transcript)
+  useEffect(() => {
+    if (!isListening && transcript && transcript.trim()) {
+      // Small delay to ensure we have the final transcript
+      const timer = setTimeout(() => {
+        sendMessage(transcript);
+        resetTranscript();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isListening, transcript]);
+
   const sendMessage = async (content: string) => {
     if (!content.trim() || isLoading) return;
+
+    // Check if user is asking for navigation help
+    if (isNavigationQuery(content)) {
+      setShowNavigation(true);
+    }
 
     const userMessage: Message = {
       id: `user_${Date.now()}`,
@@ -280,6 +326,14 @@ export function ChatInterface({ module = 'risk', context, onClose, isOpen = true
           />
         ))}
 
+        {/* Quick Navigation - shown when user asks for navigation help */}
+        {showNavigation && (
+          <QuickNavigation onNavigate={() => {
+            setShowNavigation(false);
+            onClose?.();
+          }} />
+        )}
+
         <div ref={messagesEndRef} />
       </CardContent>
 
@@ -300,14 +354,23 @@ export function ChatInterface({ module = 'risk', context, onClose, isOpen = true
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setIsListening(!isListening)}
+            onClick={() => isListening ? stopListening() : startListening()}
             className={isListening ? 'text-red-500' : 'text-gray-500'}
+            disabled={!isSpeechSupported}
+            title={isSpeechSupported ? (isListening ? 'Stop listening' : 'Start voice input') : 'Speech not supported in this browser'}
           >
             <Icon name={isListening ? 'mic-off' : 'mic'} size={20} />
           </Button>
           
           {isListening ? (
-            <VoiceWaveform isActive={isListening} />
+            <div className="flex-1 flex items-center gap-2">
+              <VoiceWaveform isActive={isListening} />
+              {interimTranscript && (
+                <span className="text-sm text-gray-500 italic truncate max-w-[150px]">
+                  {interimTranscript}
+                </span>
+              )}
+            </div>
           ) : (
             <Input
               ref={inputRef}
@@ -322,7 +385,7 @@ export function ChatInterface({ module = 'risk', context, onClose, isOpen = true
           
           <Button
             onClick={() => sendMessage(input)}
-            disabled={!input.trim() || isLoading}
+            disabled={(!input.trim() && !isListening) || isLoading}
             className="bg-violet-600 hover:bg-violet-700"
           >
             <Icon name="send" size={18} />

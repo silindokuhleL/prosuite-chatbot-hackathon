@@ -149,19 +149,23 @@ function buildBarChartData(module: string) {
       break;
     case 'asset':
       data = getCollection('asset.assets') as DataRecord[];
-      groupByField = 'status';
+      groupByField = 'category_name'; // Use category_name from JSON
       break;
     case 'incident':
       data = getCollection('incident.incidents') as DataRecord[];
-      groupByField = 'severity';
+      groupByField = 'severity_level_id';
+      useIdMapping = true;
+      idMap = { 1: 'Critical', 2: 'High', 3: 'Medium', 4: 'Low' };
       break;
     case 'audit':
       data = getCollection('audit.audit_findings') as DataRecord[];
-      groupByField = 'status';
+      groupByField = 'risk_rating_id';
+      useIdMapping = true;
+      idMap = { 1: 'Critical', 2: 'High', 3: 'Medium', 4: 'Low' };
       break;
     case 'compliance':
       data = getCollection('compliance.compliance_packages') as DataRecord[];
-      groupByField = 'status';
+      groupByField = 'name'; // Use package name
       break;
     default:
       data = getCollection('risk.risks') as DataRecord[];
