@@ -287,6 +287,43 @@ export const getGovernanceReports = () => data.governance.governance_reports;
 export const getPerformanceReports = () => data.performance.performance_reports;
 
 // ============================================
+// Navigation Data Access
+// ============================================
+
+interface NavigationMenuItem {
+  id: string;
+  label: string;
+  icon: string;
+  path?: string;
+  module?: string;
+  color?: string;
+  secondary_menu?: {
+    id: string;
+    label: string;
+    icon: string;
+    path: string;
+    module?: string;
+  }[];
+}
+
+interface NavigationData {
+  primary_menu: NavigationMenuItem[];
+  bottom_menu: NavigationMenuItem[];
+}
+
+export const getNavigation = (): NavigationData => 
+  (data as unknown as { navigation: NavigationData }).navigation;
+
+export const getPrimaryMenu = () => getNavigation().primary_menu;
+
+export const getBottomMenu = () => getNavigation().bottom_menu;
+
+export const getMenuItemById = (id: string) => {
+  const nav = getNavigation();
+  return [...nav.primary_menu, ...nav.bottom_menu].find(item => item.id === id);
+};
+
+// ============================================
 // System Data Access
 // ============================================
 

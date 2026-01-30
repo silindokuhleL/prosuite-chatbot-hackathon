@@ -785,3 +785,37 @@ export interface ModuleConfig {
 export interface ModuleRegistry {
   [key: string]: ModuleConfig;
 }
+
+// ============================================
+// Navigation & Menu Types
+// ============================================
+export type IconName = 
+  | 'home' | 'dashboard' | 'users' | 'shield' | 'settings' | 'help'
+  | 'risk' | 'asset' | 'incident' | 'compliance' | 'governance' | 'audit' | 'performance'
+  | 'list' | 'grid' | 'chart' | 'calendar' | 'file' | 'folder' | 'search'
+  | 'alert' | 'check' | 'clock' | 'star' | 'activity' | 'network' | 'building'
+  | 'map-pin' | 'user' | 'user-check' | 'contact' | 'handshake' | 'book'
+  | 'clipboard' | 'file-check' | 'file-chart' | 'refresh' | 'life-buoy' | 'message';
+
+export interface SecondaryMenuItem {
+  id: string;
+  label: string;
+  icon: IconName;
+  path: string;
+  module?: string;
+}
+
+export interface PrimaryMenuItem {
+  id: string;
+  label: string;
+  icon: IconName;
+  path?: string;
+  module?: string;
+  color?: string;
+  secondaryMenu?: SecondaryMenuItem[];
+}
+
+export interface NavigationConfig {
+  primaryMenu: PrimaryMenuItem[];
+  bottomMenu: PrimaryMenuItem[];
+}

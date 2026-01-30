@@ -1,6 +1,6 @@
 'use client';
 
-import { Sidebar } from './sidebar';
+import { AppSidebar } from './app-sidebar';
 import { Header } from './header';
 
 interface AppLayoutProps {
@@ -13,8 +13,8 @@ interface AppLayoutProps {
 export function AppLayout({ children, title, description, actions }: AppLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar />
-      <div className="lg:pl-64">
+      <AppSidebar />
+      <div className="lg:pl-72">
         <Header title={title} description={description} actions={actions} />
         <main className="p-4 lg:p-6">
           {children}

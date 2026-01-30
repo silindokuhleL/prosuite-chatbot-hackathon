@@ -415,5 +415,146 @@
             {"id": 1, "name": "KPI Dashboard", "description": "Enterprise KPI tracking", "type": "executive", "status": "published", "is_default": true, "ai_enabled": true, "tenant_id": 1},
             {"id": 2, "name": "KPI Momentum Tracker", "description": "Monitors KPI targets and trend momentum", "type": "trend", "status": "published", "is_default": false, "ai_enabled": true, "ai_insights": [{"title": "Declining Net Promoter Score", "summary": "NPS dropped 6 points quarter-on-quarter"}], "tenant_id": 1}
         ]
+    },
+    "navigation": {
+        "primary_menu": [
+            {
+                "id": "home",
+                "label": "Home",
+                "icon": "home",
+                "path": "/"
+            },
+            {
+                "id": "risk",
+                "label": "Risk",
+                "icon": "risk",
+                "module": "Risk",
+                "color": "#dc2626",
+                "secondary_menu": [
+                    {"id": "risk-dashboard", "label": "Dashboard", "icon": "dashboard", "path": "/risk"},
+                    {"id": "risk-register", "label": "Risk Register", "icon": "list", "path": "/risk/register"},
+                    {"id": "risk-action-plans", "label": "Action Plans", "icon": "clipboard", "path": "/risk/action-plans"},
+                    {"id": "risk-controls", "label": "Risk Controls", "icon": "shield", "path": "/risk/controls"},
+                    {"id": "risk-assessments", "label": "Assessments", "icon": "file-check", "path": "/risk/assessments"},
+                    {"id": "risk-reports", "label": "Reports", "icon": "file-chart", "path": "/risk/reports"}
+                ]
+            },
+            {
+                "id": "asset",
+                "label": "Asset",
+                "icon": "asset",
+                "module": "Asset",
+                "color": "#3b82f6",
+                "secondary_menu": [
+                    {"id": "asset-dashboard", "label": "Dashboard", "icon": "dashboard", "path": "/asset"},
+                    {"id": "asset-list", "label": "Assets", "icon": "list", "path": "/asset/list"},
+                    {"id": "asset-categories", "label": "Categories", "icon": "grid", "path": "/asset/categories"},
+                    {"id": "asset-departments", "label": "Departments", "icon": "network", "path": "/asset/departments"},
+                    {"id": "asset-sites", "label": "Sites", "icon": "building", "path": "/asset/sites"},
+                    {"id": "asset-locations", "label": "Locations", "icon": "map-pin", "path": "/asset/locations"},
+                    {"id": "asset-reports", "label": "Reports", "icon": "file-chart", "path": "/asset/reports"}
+                ]
+            },
+            {
+                "id": "incident",
+                "label": "Incident",
+                "icon": "incident",
+                "module": "Incident",
+                "color": "#f97316",
+                "secondary_menu": [
+                    {"id": "incident-dashboard", "label": "Dashboard", "icon": "dashboard", "path": "/incident"},
+                    {"id": "incident-register", "label": "Incident Register", "icon": "list", "path": "/incident/register"},
+                    {"id": "incident-knowledge-base", "label": "Knowledge Base", "icon": "book", "path": "/incident/knowledge-base"},
+                    {"id": "incident-reports", "label": "Reports", "icon": "file-chart", "path": "/incident/reports"}
+                ]
+            },
+            {
+                "id": "audit",
+                "label": "Audit",
+                "icon": "audit",
+                "module": "Audit",
+                "color": "#06b6d4",
+                "secondary_menu": [
+                    {"id": "audit-dashboard", "label": "Dashboard", "icon": "dashboard", "path": "/audit"},
+                    {"id": "audit-universe", "label": "Audit Universe", "icon": "network", "path": "/audit/universe"},
+                    {"id": "audit-annual-plans", "label": "Annual Audit Plans", "icon": "calendar", "path": "/audit/annual-plans"},
+                    {"id": "audit-engagements", "label": "Audit Engagements", "icon": "clipboard", "path": "/audit/engagements"},
+                    {"id": "audit-findings", "label": "Findings", "icon": "alert", "path": "/audit/findings"},
+                    {"id": "audit-action-plans", "label": "Corrective Actions", "icon": "file-check", "path": "/audit/action-plans"},
+                    {"id": "audit-follow-up", "label": "Finding Follow-Up", "icon": "refresh", "path": "/audit/follow-up"},
+                    {"id": "audit-workpapers", "label": "Workpapers", "icon": "file", "path": "/audit/workpapers"},
+                    {"id": "audit-reports", "label": "Reports", "icon": "file-chart", "path": "/audit/reports"}
+                ]
+            },
+            {
+                "id": "compliance",
+                "label": "Compliance",
+                "icon": "compliance",
+                "module": "Compliance",
+                "color": "#10b981",
+                "secondary_menu": [
+                    {"id": "compliance-dashboard", "label": "Dashboard", "icon": "dashboard", "path": "/compliance"},
+                    {"id": "compliance-regulations", "label": "Regulations & Standards", "icon": "book", "path": "/compliance/regulations"},
+                    {"id": "compliance-controls", "label": "Controls Management", "icon": "list", "path": "/compliance/controls"},
+                    {"id": "compliance-monitoring", "label": "Compliance Monitoring", "icon": "activity", "path": "/compliance/monitoring"},
+                    {"id": "compliance-assessments", "label": "Assessments", "icon": "file-check", "path": "/compliance/assessments"},
+                    {"id": "compliance-training", "label": "Training & Awareness", "icon": "users", "path": "/compliance/training"},
+                    {"id": "compliance-reports", "label": "Reports", "icon": "file-chart", "path": "/compliance/reports"}
+                ]
+            },
+            {
+                "id": "governance",
+                "label": "Governance",
+                "icon": "governance",
+                "module": "Governance",
+                "color": "#8b5cf6",
+                "secondary_menu": [
+                    {"id": "governance-dashboard", "label": "Dashboard", "icon": "dashboard", "path": "/governance"},
+                    {"id": "governance-objectives", "label": "Objectives & Strategy", "icon": "chart", "path": "/governance/objectives"},
+                    {"id": "governance-structure", "label": "Organisational Structure", "icon": "building", "path": "/governance/structure"},
+                    {"id": "governance-policies", "label": "Policies", "icon": "file", "path": "/governance/policies"},
+                    {"id": "governance-committees", "label": "Committee Management", "icon": "users", "path": "/governance/committees"},
+                    {"id": "governance-delegations", "label": "Delegations of Authority", "icon": "user-check", "path": "/governance/delegations"},
+                    {"id": "governance-bcp", "label": "Business Continuity", "icon": "shield", "path": "/governance/business-continuity"},
+                    {"id": "governance-coi", "label": "Conflict of Interest", "icon": "handshake", "path": "/governance/conflict-of-interest"},
+                    {"id": "governance-reports", "label": "Reports", "icon": "file-chart", "path": "/governance/reports"}
+                ]
+            },
+            {
+                "id": "performance",
+                "label": "Performance",
+                "icon": "performance",
+                "module": "Performance",
+                "color": "#ec4899",
+                "secondary_menu": [
+                    {"id": "performance-dashboard", "label": "Dashboard", "icon": "dashboard", "path": "/performance"},
+                    {"id": "performance-kpis", "label": "KPIs", "icon": "activity", "path": "/performance/kpis"},
+                    {"id": "performance-metrics", "label": "Metrics", "icon": "chart", "path": "/performance/metrics"},
+                    {"id": "performance-scorecards", "label": "Scorecards", "icon": "grid", "path": "/performance/scorecards"},
+                    {"id": "performance-reviews", "label": "Reviews", "icon": "file-check", "path": "/performance/reviews"},
+                    {"id": "performance-reports", "label": "Reports", "icon": "file-chart", "path": "/performance/reports"}
+                ]
+            }
+        ],
+        "bottom_menu": [
+            {
+                "id": "help",
+                "label": "Help",
+                "icon": "help",
+                "secondary_menu": [
+                    {"id": "help-faq", "label": "FAQs", "icon": "message", "path": "/help/faq"},
+                    {"id": "help-guide", "label": "User Guide", "icon": "book", "path": "/help/user-guide"},
+                    {"id": "help-support", "label": "Contact Support", "icon": "life-buoy", "path": "/help/support"}
+                ]
+            },
+            {
+                "id": "settings",
+                "label": "Settings",
+                "icon": "settings",
+                "secondary_menu": [
+                    {"id": "settings-account", "label": "Account", "icon": "user", "path": "/settings/account"}
+                ]
+            }
+        ]
     }
 }
