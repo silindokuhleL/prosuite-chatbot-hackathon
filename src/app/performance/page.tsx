@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icons';
 import { getPerformanceReports, getDashboardMetrics, getBusinessObjectives, getBusinessObjectiveStatuses } from '@/lib/data';
+import { PROSUITE_COLORS } from '@/lib/colors';
 
 export default function PerformancePage() {
   const reports = getPerformanceReports();
@@ -30,6 +31,8 @@ export default function PerformancePage() {
           { label: 'Dashboard', href: '/' },
           { label: 'Performance Management' },
         ]}
+        textColor={PROSUITE_COLORS.performance.text}
+        accentColor={PROSUITE_COLORS.performance.accent}
       />
 
       <div className="space-y-6">

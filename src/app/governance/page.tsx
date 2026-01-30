@@ -3,6 +3,7 @@ import { PageHeader } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icons';
 import { GovernanceOverview } from './governance-overview';
+import { PROSUITE_COLORS } from '@/lib/colors';
 
 export default function GovernancePage() {
   return (
@@ -14,6 +15,8 @@ export default function GovernancePage() {
           { label: 'Dashboard', href: '/' },
           { label: 'Governance Management' },
         ]}
+        textColor={PROSUITE_COLORS.governance.text}
+        accentColor={PROSUITE_COLORS.governance.accent}
         actions={
           <>
             <Button variant="outline" size="sm">

@@ -3,6 +3,7 @@ import { PageHeader } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icons';
 import { ComplianceList } from './compliance-list';
+import { PROSUITE_COLORS } from '@/lib/colors';
 
 export default function CompliancePage() {
   return (
@@ -14,6 +15,8 @@ export default function CompliancePage() {
           { label: 'Dashboard', href: '/' },
           { label: 'Compliance Management' },
         ]}
+        textColor={PROSUITE_COLORS.compliance.text}
+        accentColor={PROSUITE_COLORS.compliance.accent}
         actions={
           <>
             <Button variant="outline" size="sm">

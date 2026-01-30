@@ -3,17 +3,20 @@ import { PageHeader } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icons';
 import { RiskList } from './risk-list';
+import { PROSUITE_COLORS } from '@/lib/colors';
 
 export default function RiskPage() {
   return (
     <AppLayout>
       <PageHeader
         title="Risk Management"
-        description="Identify, assess, and manage organizational risks"
+        description="Comprehensive risk identification, assessment, and mitigation"
         breadcrumbs={[
           { label: 'Dashboard', href: '/' },
           { label: 'Risk Management' },
         ]}
+        textColor={PROSUITE_COLORS.risk.text}
+        accentColor={PROSUITE_COLORS.risk.accent}
         actions={
           <>
             <Button variant="outline" size="sm">
@@ -24,7 +27,7 @@ export default function RiskPage() {
               <Icon name="download" size={16} className="mr-2" />
               Export
             </Button>
-            <Button size="sm">
+            <Button size="sm" style={{ backgroundColor: PROSUITE_COLORS.risk.text }}>
               <Icon name="plus" size={16} className="mr-2" />
               New Risk
             </Button>

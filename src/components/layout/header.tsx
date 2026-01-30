@@ -64,9 +64,21 @@ interface PageHeaderProps {
   description?: string;
   breadcrumbs?: { label: string; href?: string }[];
   actions?: React.ReactNode;
+  textColor?: string;
+  accentColor?: string;
 }
 
-export function PageHeader({ title, description, breadcrumbs, actions }: PageHeaderProps) {
+export function PageHeader({ 
+  title, 
+  description, 
+  breadcrumbs, 
+  actions,
+  textColor = '#006EAD',
+  accentColor = '#91BC4D',
+}: PageHeaderProps) {
+  const [pageTitleFirstWord, ...remainingWords] = (title || '').split(' ');
+  const remainingTitle = remainingWords.join(' ');
+
   return (
     <div className="mb-6 space-y-4">
       {breadcrumbs && breadcrumbs.length > 0 && (
@@ -87,11 +99,22 @@ export function PageHeader({ title, description, breadcrumbs, actions }: PageHea
       )}
       
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-          {description && (
-            <p className="mt-1 text-muted-foreground">{description}</p>
-          )}
+        <div className="flex items-center" style={{ color: textColor }}>
+          <span
+            className="w-[4px] h-[32px] mr-3 rounded-full"
+            style={{ backgroundColor: accentColor }}
+          />
+          <div>
+            <h1 className="text-xl md:text-2xl leading-snug">
+              <span className="font-bold mr-1">{pageTitleFirstWord}</span>
+              <span className="font-light">{remainingTitle}</span>
+            </h1>
+            {description && (
+              <p className="text-[12px] leading-[14px] text-muted-foreground">
+                {description}
+              </p>
+            )}
+          </div>
         </div>
         {actions && <div className="flex items-center gap-2">{actions}</div>}
       </div>
