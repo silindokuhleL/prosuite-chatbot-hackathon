@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icons';
 import { ChatInterface } from './chat-interface';
@@ -11,8 +12,31 @@ interface ChatButtonProps {
   context?: Record<string, unknown>;
 }
 
-export function ChatButton({ module = 'risk', context }: ChatButtonProps) {
+// Detect module from URL path
+function detectModuleFromPath(pathname: string): ModuleKey {
+  const pathParts = pathname.split('/').filter(Boolean);
+  const firstPart = pathParts[0]?.toLowerCase();
+  
+  const moduleMap: Record<string, ModuleKey> = {
+    'risk': 'risk',
+    'asset': 'asset',
+    'incident': 'incident',
+    'audit': 'audit',
+    'compliance': 'compliance',
+    'governance': 'governance',
+    'performance': 'performance',
+  };
+  
+  return moduleMap[firstPart] || 'risk';
+}
+
+export function ChatButton({ module: propModule, context }: ChatButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  
+  // Auto-detect module from URL if not provided
+  const detectedModule = detectModuleFromPath(pathname);
+  const module = propModule || detectedModule;
 
   return (
     <>
