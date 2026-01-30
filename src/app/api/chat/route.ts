@@ -2,8 +2,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
+// Validate API key exists
+const apiKey = process.env.OPENAI_API_KEY;
+if (!apiKey) {
+  console.error('OPENAI_API_KEY is not set in environment variables');
+}
+
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: apiKey || '',
 });
 
 const SYSTEM_PROMPT = `You are ProSuite AI, an intelligent enterprise GRC (Governance, Risk, and Compliance) assistant.
@@ -35,12 +41,22 @@ Respond in a helpful, accurate manner while maintaining enterprise security stan
 
 export async function POST(request: NextRequest) {
   try {
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'OpenAI API key not configured' },
+        { status: 500 }
+      );
+    }
+
     const { messages, module, context } = await request.json();
 
     const moduleContext = module ? `\n\nCurrent Module: ${module}\nContext: ${JSON.stringify(context || {})}` : '';
 
+    // Use gpt-4o-mini as default (gpt-5-mini doesn't exist)
+    const model = process.env.OPENAI_MODEL === 'gpt-5-mini' ? 'gpt-4o-mini' : (process.env.OPENAI_MODEL || 'gpt-4o-mini');
+    
     const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      model,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT + moduleContext },
         ...messages,
@@ -74,8 +90,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Chat API Error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to process chat request' },
+      { error: 'Failed to process chat request', details: errorMessage },
       { status: 500 }
     );
   }
