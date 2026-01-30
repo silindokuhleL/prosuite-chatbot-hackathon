@@ -2,57 +2,6 @@
 
 import { cn } from '@/lib/utils';
 
-interface SpinnerProps {
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
-}
-
-export function Spinner({ size = 'md', className }: SpinnerProps) {
-  const sizeClasses = {
-    sm: 'h-4 w-4 border-2',
-    md: 'h-8 w-8 border-2',
-    lg: 'h-12 w-12 border-3',
-  };
-
-  return (
-    <div
-      className={cn(
-        'animate-spin rounded-full border-primary border-t-transparent',
-        sizeClasses[size],
-        className
-      )}
-    />
-  );
-}
-
-interface LoadingProps {
-  message?: string;
-  fullScreen?: boolean;
-}
-
-export function Loading({ message = 'Loading...', fullScreen = false }: LoadingProps) {
-  const content = (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <Spinner size="lg" />
-      <p className="text-sm text-muted-foreground">{message}</p>
-    </div>
-  );
-
-  if (fullScreen) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-        {content}
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex min-h-[200px] items-center justify-center">
-      {content}
-    </div>
-  );
-}
-
 export function Skeleton({ className }: { className?: string }) {
   return (
     <div
@@ -123,6 +72,47 @@ export function DashboardSkeleton() {
           <CardSkeleton />
         </div>
       </div>
+    </div>
+  );
+}
+
+export function ContentSkeleton({ className }: { className?: string }) {
+  return (
+    <div className={cn('animate-pulse blur-[2px] opacity-70', className)}>
+      <div className="space-y-4">
+        <div className="h-10 w-full rounded-lg bg-muted" />
+        <div className="h-64 w-full rounded-lg bg-muted" />
+      </div>
+    </div>
+  );
+}
+
+export function ListSkeleton({ items = 5 }: { items?: number }) {
+  return (
+    <div className="animate-pulse blur-[1px] opacity-80 space-y-3">
+      {Array.from({ length: items }).map((_, i) => (
+        <div 
+          key={i} 
+          className="flex items-center gap-4 rounded-lg border border-border bg-card p-4"
+        >
+          <Skeleton className="h-10 w-10 rounded-full" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
+          </div>
+          <Skeleton className="h-6 w-16 rounded-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function GridSkeleton({ items = 6 }: { items?: number }) {
+  return (
+    <div className="animate-pulse blur-[1px] opacity-80 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: items }).map((_, i) => (
+        <CardSkeleton key={i} />
+      ))}
     </div>
   );
 }

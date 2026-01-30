@@ -13,6 +13,7 @@
 - ❌ Other UI libraries (Material-UI, Ant Design, etc.)
 - ❌ Inline CSS or styled-components
 - ❌ Other icon libraries
+- ❌ Spinner/loading indicators (use Suspense with skeleton blur)
 
 ---
 
@@ -43,7 +44,7 @@ src/
 ### Global Components (`src/components`)
 - **ui/**: shadcn/ui components ONLY - do not modify
 - **layout/**: Headers, sidebars, navigation shells
-- **shared/**: Reusable components like loaders, empty states, error boundaries
+- **shared/**: Reusable components like skeletons, empty states, error boundaries
 
 ### Component Guidelines
 - Use shadcn/ui components as base
@@ -224,7 +225,92 @@ export const CHATBOT_CONFIG = {
 
 ---
 
-## 12. Git Workflow
+## 12. Loading States (Suspense Pattern)
+
+### Rules
+- ❌ **NO spinner loaders** - spinners are forbidden
+- ❌ **NO generic skeletons** - each component needs its own specific skeleton
+- ✅ Use React Suspense with component-specific skeleton fallbacks
+- ✅ Static content (headings, labels, navigation) must always display immediately
+- ✅ Only fetched/dynamic content should be wrapped in Suspense
+- ✅ Each new component that fetches data MUST have a matching skeleton
+
+### Component-Specific Skeletons
+Every component that fetches data needs its own skeleton that mirrors its layout:
+
+```typescript
+// Component: RiskList.tsx
+export function RiskList() { ... }
+
+// Matching skeleton: RiskListSkeleton.tsx (same folder)
+export function RiskListSkeleton() {
+  return (
+    <div className="animate-pulse blur-[1px] opacity-80">
+      {/* Mirrors RiskList structure */}
+      <div className="rounded-lg border">
+        <div className="h-12 bg-muted/50" /> {/* Table header */}
+        {[1,2,3,4,5].map(i => (
+          <div key={i} className="h-16 border-t bg-muted/30" />
+        ))}
+      </div>
+    </div>
+  )
+}
+```
+
+### Page Pattern
+```typescript
+// ✅ Correct - Static header visible, fetched content has specific skeleton
+export default function RiskPage() {
+  return (
+    <>
+      <PageHeader title="Risk Management" />  {/* Always visible */}
+      <Suspense fallback={<RiskListSkeleton />}>
+        <RiskList />  {/* Has its own skeleton */}
+      </Suspense>
+    </>
+  )
+}
+
+// ❌ Wrong - Generic skeleton
+<Suspense fallback={<ContentSkeleton />}>
+  <RiskList />
+</Suspense>
+
+// ❌ Wrong - Using spinners
+{isLoading && <Spinner />}
+```
+
+### Skeleton Naming Convention
+| Component | Skeleton |
+|-----------|----------|
+| `RiskList` | `RiskListSkeleton` |
+| `AssetTable` | `AssetTableSkeleton` |
+| `MetricsGrid` | `MetricsGridSkeleton` |
+| `RiskHeatmap` | `RiskHeatmapSkeleton` |
+
+### What Needs a Skeleton vs What Doesn't
+
+| Needs Skeleton (fetched) | No Skeleton (static) |
+|--------------------------|----------------------|
+| Data tables | Page headers |
+| List components | Breadcrumbs |
+| Charts/graphs | Navigation/sidebar |
+| Metric cards (if fetched) | Labels/titles |
+| API-fetched content | Action buttons |
+| Dynamic widgets | Form fields |
+
+### Skeleton File Structure
+```
+src/app/risk/
+├── page.tsx           # Page component
+├── risk-list.tsx      # Data component
+└── risk-list-skeleton.tsx  # Matching skeleton
+```
+
+---
+
+## 13. Git Workflow
 
 - Use descriptive commit messages
 - Keep commits atomic and focused
