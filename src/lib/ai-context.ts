@@ -1,5 +1,5 @@
 // ============================================
-// ProSuite AI Context Provider
+// Mazwi Context Provider
 // Comprehensive system context for AI assistants
 // ============================================
 

@@ -243,7 +243,13 @@ export function ChatInterface({ module = 'risk', context, onClose, isOpen = true
   if (!isOpen) return null;
 
   return (
-    <Card className="fixed bottom-4 right-4 w-[420px] h-[600px] shadow-2xl z-50 flex flex-col overflow-hidden border-2">
+    <Card 
+      className="fixed bottom-4 right-4 w-[420px] h-[600px] shadow-2xl z-50 flex flex-col overflow-hidden border-2"
+      role="dialog"
+      aria-labelledby="chat-title"
+      aria-describedby="chat-description"
+      aria-modal="true"
+    >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-violet-600 to-purple-600 text-white">
         <div className="flex items-center gap-3">
@@ -251,22 +257,33 @@ export function ChatInterface({ module = 'risk', context, onClose, isOpen = true
             <Icon name="bot" size={24} />
           </div>
           <div>
-            <h3 className="font-semibold">ProSuite AI</h3>
-            <p className="text-xs text-white/80">GRC Intelligence Assistant</p>
+            <h3 id="chat-title" className="font-semibold">Mazwi</h3>
+            <p id="chat-description" className="text-xs text-white/80">GRC Intelligence Assistant</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">{module}</span>
           {onClose && (
-            <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20">
-              <Icon name="x" size={18} />
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onClose} 
+              className="text-white hover:bg-white/20"
+              aria-label="Close chat"
+            >
+              <Icon name="x" size={18} aria-hidden="true" />
             </Button>
           )}
         </div>
       </div>
 
       {/* Messages */}
-      <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+      <CardContent 
+        className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50"
+        role="log"
+        aria-live="polite"
+        aria-label="Chat messages"
+      >
         {messages.length === 0 && (
           <div className="text-center py-8">
             <Icon name="message-square" size={48} className="mx-auto text-gray-300 mb-4" />
@@ -357,9 +374,10 @@ export function ChatInterface({ module = 'risk', context, onClose, isOpen = true
             onClick={() => isListening ? stopListening() : startListening()}
             className={isListening ? 'text-red-500' : 'text-gray-500'}
             disabled={!isSpeechSupported}
-            title={isSpeechSupported ? (isListening ? 'Stop listening' : 'Start voice input') : 'Speech not supported in this browser'}
+            aria-label={isSpeechSupported ? (isListening ? 'Stop voice input' : 'Start voice input') : 'Speech not supported'}
+            aria-pressed={isListening}
           >
-            <Icon name={isListening ? 'mic-off' : 'mic'} size={20} />
+            <Icon name={isListening ? 'mic-off' : 'mic'} size={20} aria-hidden="true" />
           </Button>
           
           {isListening ? (
@@ -377,9 +395,11 @@ export function ChatInterface({ module = 'risk', context, onClose, isOpen = true
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask ProSuite AI..."
+              placeholder="Ask Mazwi..."
               className="flex-1"
               disabled={isLoading}
+              aria-label="Type your message"
+              autoComplete="off"
             />
           )}
           
@@ -387,8 +407,9 @@ export function ChatInterface({ module = 'risk', context, onClose, isOpen = true
             onClick={() => sendMessage(input)}
             disabled={(!input.trim() && !isListening) || isLoading}
             className="bg-violet-600 hover:bg-violet-700"
+            aria-label="Send message"
           >
-            <Icon name="send" size={18} />
+            <Icon name="send" size={18} aria-hidden="true" />
           </Button>
         </div>
       </div>
