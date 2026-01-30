@@ -1,4 +1,3 @@
-import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icons';
@@ -7,7 +6,7 @@ import { PROSUITE_COLORS } from '@/lib/colors';
 
 export default function AssetPage() {
   return (
-    <AppLayout>
+    <>
       <PageHeader
         title="Asset Management"
         description="Track, manage, and depreciate organizational assets"
@@ -35,6 +34,6 @@ export default function AssetPage() {
         }
       />
       <AssetList />
-    </AppLayout>
+    </>
   );
 }

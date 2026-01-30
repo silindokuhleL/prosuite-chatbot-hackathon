@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { getPrimaryMenu, getBottomMenu } from '@/lib/data';
-import { Icon, Icons, type IconName } from '@/components/ui/icons';
+import { Icon, type IconName } from '@/components/ui/icons';
 
 type MenuItem = {
   id: string;
@@ -70,28 +70,31 @@ function getIconComponent(iconName: string): IconName {
 
 interface PrimarySidebarProps {
   activeItem: string | null;
-  onItemClick: (item: MenuItem) => void;
   primaryMenu: MenuItem[];
   bottomMenu: MenuItem[];
 }
 
-function PrimarySidebar({ activeItem, onItemClick, primaryMenu, bottomMenu }: PrimarySidebarProps) {
+function PrimarySidebar({ activeItem, primaryMenu, bottomMenu }: PrimarySidebarProps) {
   const pathname = usePathname();
 
   const isItemActive = (item: MenuItem) => {
     if (item.path && pathname === item.path) return true;
     if (item.secondary_menu) {
-      return item.secondary_menu.some(sub => pathname.startsWith(sub.path));
+      return item.secondary_menu.some(sub => {
+        if (pathname === sub.path) return true;
+        if (pathname.startsWith(sub.path + '/')) return true;
+        return false;
+      });
     }
     return activeItem === item.id;
   };
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-50 hidden w-16 flex-col border-r border-border bg-primary lg:flex">
+    <aside className="fixed inset-y-0 left-0 z-50 hidden w-16 flex-col border-r border-blue-700 bg-blue-600 lg:flex">
       {/* Logo */}
-      <div className="flex h-16 items-center justify-center border-b border-primary-foreground/20">
+      <div className="flex h-16 items-center justify-center border-b border-blue-500">
         <Link href="/" className="flex items-center justify-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20">
             <span className="text-lg font-bold text-white">PS</span>
           </div>
         </Link>
@@ -102,56 +105,49 @@ function PrimarySidebar({ activeItem, onItemClick, primaryMenu, bottomMenu }: Pr
         {primaryMenu.map((item) => {
           const isActive = isItemActive(item);
           const hasSubmenu = item.secondary_menu && item.secondary_menu.length > 0;
+          const targetPath = hasSubmenu ? item.secondary_menu![0].path : (item.path || '/');
           
           return (
-            <button
+            <Link
               key={item.id}
-              onClick={() => hasSubmenu ? onItemClick(item) : undefined}
+              href={targetPath}
               className={cn(
                 'flex w-full flex-col items-center justify-center rounded-lg p-2 text-xs transition-colors',
                 isActive
-                  ? 'bg-white/20 text-white'
-                  : 'text-white/70 hover:bg-white/10 hover:text-white'
-              )}
-              title={item.label}
-            >
-              {hasSubmenu ? (
-                <>
-                  <Icon name={getIconComponent(item.icon)} size={22} />
-                  <span className="mt-1 truncate text-[10px]">{item.label}</span>
-                </>
-              ) : (
-                <Link href={item.path || '/'} className="flex flex-col items-center">
-                  <Icon name={getIconComponent(item.icon)} size={22} />
-                  <span className="mt-1 truncate text-[10px]">{item.label}</span>
-                </Link>
-              )}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Bottom Menu */}
-      <div className="border-t border-primary-foreground/20 p-2 space-y-1">
-        {bottomMenu.map((item) => {
-          const isActive = activeItem === item.id;
-          const hasSubmenu = item.secondary_menu && item.secondary_menu.length > 0;
-          
-          return (
-            <button
-              key={item.id}
-              onClick={() => hasSubmenu ? onItemClick(item) : undefined}
-              className={cn(
-                'flex w-full flex-col items-center justify-center rounded-lg p-2 text-xs transition-colors',
-                isActive
-                  ? 'bg-white/20 text-white'
-                  : 'text-white/70 hover:bg-white/10 hover:text-white'
+                  ? 'bg-blue-700 text-white'
+                  : 'text-white/80 hover:bg-blue-500 hover:text-white'
               )}
               title={item.label}
             >
               <Icon name={getIconComponent(item.icon)} size={22} />
               <span className="mt-1 truncate text-[10px]">{item.label}</span>
-            </button>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Bottom Menu */}
+      <div className="border-t border-blue-500 p-2 space-y-1">
+        {bottomMenu.map((item) => {
+          const isActive = activeItem === item.id || (item.secondary_menu?.some(sub => pathname.startsWith(sub.path)));
+          const hasSubmenu = item.secondary_menu && item.secondary_menu.length > 0;
+          const targetPath = hasSubmenu ? item.secondary_menu![0].path : (item.path || '/');
+          
+          return (
+            <Link
+              key={item.id}
+              href={targetPath}
+              className={cn(
+                'flex w-full flex-col items-center justify-center rounded-lg p-2 text-xs transition-colors',
+                isActive
+                  ? 'bg-blue-700 text-white'
+                  : 'text-white/80 hover:bg-blue-500 hover:text-white'
+              )}
+              title={item.label}
+            >
+              <Icon name={getIconComponent(item.icon)} size={22} />
+              <span className="mt-1 truncate text-[10px]">{item.label}</span>
+            </Link>
           );
         })}
       </div>
@@ -161,26 +157,20 @@ function PrimarySidebar({ activeItem, onItemClick, primaryMenu, bottomMenu }: Pr
 
 interface SecondarySidebarProps {
   item: MenuItem | null;
-  onClose: () => void;
 }
 
-function SecondarySidebar({ item, onClose }: SecondarySidebarProps) {
+function SecondarySidebar({ item }: SecondarySidebarProps) {
   const pathname = usePathname();
 
   if (!item || !item.secondary_menu) return null;
 
   return (
     <aside 
-      className={cn(
-        'fixed inset-y-0 left-16 z-40 hidden w-56 flex-col border-r border-border bg-sidebar lg:flex',
-        'transition-transform duration-200',
-        item ? 'translate-x-0' : '-translate-x-full'
-      )}
+      className="fixed inset-y-0 left-16 z-40 hidden w-56 flex-col border-r border-blue-200 bg-blue-50 lg:flex"
     >
       {/* Header */}
       <div 
-        className="flex h-16 items-center justify-between border-b border-border px-4"
-        style={{ backgroundColor: item.color ? `${item.color}15` : undefined }}
+        className="flex h-16 items-center border-b border-blue-200 px-4 bg-blue-100"
       >
         <div className="flex items-center gap-2">
           <Icon 
@@ -195,18 +185,12 @@ function SecondarySidebar({ item, onClose }: SecondarySidebarProps) {
             {item.label}
           </span>
         </div>
-        <button
-          onClick={onClose}
-          className="rounded-lg p-1 hover:bg-muted"
-        >
-          <Icon name="chevronLeft" size={18} />
-        </button>
       </div>
 
       {/* Secondary Menu Items */}
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         {item.secondary_menu.map((subItem) => {
-          const isActive = pathname === subItem.path || pathname.startsWith(subItem.path + '/');
+          const isActive = pathname === subItem.path || (subItem.path !== '/' && pathname.startsWith(subItem.path + '/'));
           
           return (
             <Link
@@ -215,8 +199,8 @@ function SecondarySidebar({ item, onClose }: SecondarySidebarProps) {
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                 isActive
-                  ? 'text-sidebar-accent-foreground'
-                  : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
+                  ? 'bg-blue-200 text-blue-900'
+                  : 'text-blue-800 hover:bg-blue-100'
               )}
               style={isActive ? { 
                 backgroundColor: item.color ? `${item.color}20` : undefined,
@@ -235,48 +219,46 @@ function SecondarySidebar({ item, onClose }: SecondarySidebarProps) {
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const [activeMenuItem, setActiveMenuItem] = useState<MenuItem | null>(null);
   const primaryMenu = getPrimaryMenu();
   const bottomMenu = getBottomMenu();
 
-  // Determine active menu item based on current path
-  useEffect(() => {
+  // Always derive active menu item from current path - sidebar is always visible
+  const activeMenuItem = useMemo(() => {
     const allMenuItems = [...primaryMenu, ...bottomMenu];
-    const activeItem = allMenuItems.find(item => {
+    
+    // Find matching module based on path
+    const matchedItem = allMenuItems.find(item => {
       if (item.secondary_menu) {
-        return item.secondary_menu.some(sub => pathname.startsWith(sub.path));
+        // Check if current path matches any secondary menu path
+        return item.secondary_menu.some(sub => {
+          // Exact match for dashboard paths (e.g., /risk, /asset)
+          if (pathname === sub.path) return true;
+          // Prefix match for sub-pages (e.g., /risk/register)
+          if (pathname.startsWith(sub.path + '/')) return true;
+          return false;
+        });
       }
       return false;
     });
-    
-    if (activeItem) {
-      setActiveMenuItem(activeItem);
+
+    // If no match found, default to first module with secondary menu (Risk)
+    if (!matchedItem) {
+      const firstModuleWithMenu = allMenuItems.find(item => item.secondary_menu && item.secondary_menu.length > 0);
+      return firstModuleWithMenu || null;
     }
+
+    return matchedItem;
   }, [pathname, primaryMenu, bottomMenu]);
-
-  const handleItemClick = (item: MenuItem) => {
-    if (activeMenuItem?.id === item.id) {
-      setActiveMenuItem(null);
-    } else {
-      setActiveMenuItem(item);
-    }
-  };
-
-  const handleCloseSecondary = () => {
-    setActiveMenuItem(null);
-  };
 
   return (
     <>
       <PrimarySidebar 
         activeItem={activeMenuItem?.id || null}
-        onItemClick={handleItemClick}
         primaryMenu={primaryMenu}
         bottomMenu={bottomMenu}
       />
       <SecondarySidebar 
         item={activeMenuItem}
-        onClose={handleCloseSecondary}
       />
     </>
   );

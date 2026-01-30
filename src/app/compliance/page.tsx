@@ -1,4 +1,3 @@
-import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icons';
@@ -7,7 +6,7 @@ import { PROSUITE_COLORS } from '@/lib/colors';
 
 export default function CompliancePage() {
   return (
-    <AppLayout>
+    <>
       <PageHeader
         title="Compliance Management"
         description="Track regulatory compliance across standards and frameworks"
@@ -31,6 +30,6 @@ export default function CompliancePage() {
         }
       />
       <ComplianceList />
-    </AppLayout>
+    </>
   );
 }

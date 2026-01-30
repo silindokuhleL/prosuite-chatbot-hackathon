@@ -1,4 +1,3 @@
-import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +22,7 @@ export default function PerformancePage() {
   };
 
   return (
-    <AppLayout>
+    <>
       <PageHeader
         title="Performance Management"
         description="Track KPIs and organizational performance metrics"
@@ -158,6 +157,6 @@ export default function PerformancePage() {
           </CardContent>
         </Card>
       </div>
-    </AppLayout>
+    </>
   );
 }
