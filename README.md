@@ -1,37 +1,192 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Prosuite Chatbot Hackathon
 
-## Getting Started
+AI-assisted GRC dashboard prototype for exploring how a chatbot can help users navigate Governance, Risk, Compliance, Audit, Asset, Incident, and Performance workflows.
 
-First, run the development server:
+The assistant is called **Mazwi**. It sits inside a ProSuite-style dashboard and uses module context, seeded demo data, OpenAI chat completions, quick suggestions, visual responses, and approval-aware action patterns.
+
+## Portfolio Proof Status
+
+Current status:
+
+- Next.js dashboard prototype: available.
+- GRC module navigation: available.
+- Seeded demo data: available.
+- Floating Mazwi assistant: available.
+- OpenAI chat route: available.
+- Streaming response UI: available.
+- Module-aware quick suggestions: available.
+- Visual response triggers: available.
+- Browser screenshots: available.
+- Production build: currently failing on a TypeScript issue.
+- Lint: currently failing on React/TypeScript rule issues.
+- Live AI response proof: not captured in this pass because it requires sending a prompt through the configured OpenAI account.
+
+## Visual Proof
+
+Dashboard:
+
+![Prosuite dashboard](Docs/proof-assets/prosuite-dashboard.png)
+
+Mazwi chat interface:
+
+![Mazwi chat interface](Docs/proof-assets/prosuite-mazwi-chat.png)
+
+More verification detail:
+
+- [Local verification log](Docs/LOCAL_VERIFICATION.md)
+- [Demo questions](DEMO_QUESTIONS.md)
+- [AI implementation checklist](AI_IMPLEMENTATION_CHECKLIST.md)
+
+## What This Project Proves
+
+- Next.js App Router dashboard architecture.
+- AI feature integration inside a business workflow interface.
+- OpenAI-powered chat route with streaming responses.
+- Prompt engineering for GRC-specific assistant behavior.
+- Context building from local ProSuite demo data.
+- Role/action safety concepts for AI-assisted create, update, delete, escalation, reporting, and evidence-harvesting workflows.
+- UI proof for a real assistant surface, not only a standalone chat page.
+- Data visualization concepts for AI responses, including heatmaps, charts, metrics, progress, and tables.
+
+## AI Provider And Model
+
+Provider:
+
+- OpenAI
+
+Packages:
+
+- `openai`
+- `@ai-sdk/openai`
+- `ai`
+
+Default model:
+
+```text
+gpt-4o-mini
+```
+
+The API route falls back to `gpt-4o-mini` when `OPENAI_MODEL` is not set. The route also maps the invalid value `gpt-5-mini` back to `gpt-4o-mini`.
+
+Primary route:
+
+```text
+src/app/api/chat/route.ts
+```
+
+Important AI files:
+
+```text
+src/app/api/chat/route.ts                 # Streaming OpenAI chat endpoint
+src/components/ai/chat-interface.tsx       # Mazwi chat UI
+src/components/ai/chat-button.tsx          # Floating assistant launcher
+src/lib/ai/config.ts                       # Module definitions and suggestions
+src/lib/ai/prompts/system.ts               # System and module prompts
+src/lib/ai/context/builder.ts              # Module/screen context builders
+src/lib/ai/actions/handler.ts              # AI action handling
+src/lib/ai/actions/types.ts                # Action types and approval model
+src/services/permissions.ts                # Role-based AI action permissions
+src/services/audit-logger.ts               # AI action audit logging concept
+src/services/pattern-detection.ts          # Risk, incident, and KPI pattern helpers
+src/components/ai/smart-visualizer.tsx     # Response-driven visualizer
+src/components/ai/quick-navigation.tsx     # Navigation help inside chat
+```
+
+## Main Features
+
+- Dashboard with GRC metrics, risk heatmap, recent activity, and module cards.
+- GRC modules for risk, asset, incident, audit, compliance, governance, and performance.
+- Floating Mazwi assistant that detects the active module from the route.
+- Module-specific suggested prompts.
+- Streaming assistant responses from `/api/chat`.
+- Markdown rendering for assistant responses.
+- Automatic visualization triggers based on assistant wording.
+- Quick navigation when users ask where to find a module or page.
+- Action confirmation pattern for AI-proposed operations.
+- Voice input UI using the browser speech recognition layer.
+- Keyboard shortcut support for chat open/close.
+- Local chat history and preference hooks.
+
+## Demo Questions
+
+Good questions for showing the project:
+
+```text
+Show me the risk heatmap
+Summarize top 5 critical risks
+Show risks without mitigation plans
+Analyze risk trends this quarter
+How many assets do we have?
+What is our overall compliance score?
+Which policies are due for review?
+Show me incident trends
+Take me to audit engagements
+```
+
+The full demo list is in [DEMO_QUESTIONS.md](DEMO_QUESTIONS.md).
+
+## Local Setup
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create a local environment file:
+
+```bash
+touch .env.local
+```
+
+Add your OpenAI key:
+
+```text
+OPENAI_API_KEY=your-key-here
+OPENAI_MODEL=gpt-4o-mini
+OPENAI_MAX_TOKENS=4000
+OPENAI_TEMPERATURE=0.7
+```
+
+Start the dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Verification Notes
 
-## Learn More
+Latest local proof pass: 2026-07-09.
 
-To learn more about Next.js, take a look at the following resources:
+Passed:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `npm install` completed.
+- Dev server rendered locally on `http://localhost:3109`.
+- Browser verified dashboard content, module navigation, risk heatmap, metrics, and recent activity.
+- Browser verified the Mazwi chat panel opens and shows module-aware risk suggestions.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Needs work:
 
-## Deploy on Vercel
+- `npm run lint` currently fails.
+- `npm run build` currently fails.
+- npm audit reports 9 vulnerabilities.
+- Live AI response proof still needs a safe demo run with an approved OpenAI key and non-sensitive prompt.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Known Gaps
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# prosuite-chatbot-hackathon
+- Build fails in `src/lib/ai/actions/handler.ts` because escalation update data does not match the current generic `updateItem` type.
+- Lint fails on React compiler rules such as synchronous state updates in effects and static component rules across several pages.
+- Some AI action services are proof-of-concept helpers around local JSON data, not production persistence.
+- Sensitive data masking, cross-tenant isolation, and long-term RAG memory are still listed as pending/future work.
+
+## Portfolio Summary
+
+**Prosuite Chatbot Hackathon** is best presented as an AI product prototype: a Next.js GRC dashboard with an embedded assistant that understands business modules, can stream OpenAI responses, can trigger visual summaries, and demonstrates approval-aware AI action design.
+
+It is not yet production-ready, but it is useful proof of AI workflow thinking, frontend architecture, business-domain modeling, and the ability to turn enterprise software workflows into assistant-driven user experiences.
