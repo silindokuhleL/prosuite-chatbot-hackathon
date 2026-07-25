@@ -17,6 +17,12 @@ export interface AIContext {
   relatedData: Record<string, unknown[]>;
 }
 
+type DataRecord = Record<string, unknown>;
+
+function isDataRecord(value: unknown): value is DataRecord {
+  return typeof value === 'object' && value !== null;
+}
+
 // Build context for the current module
 export function buildModuleContext(module: ModuleKey, currentPage?: string): AIContext {
   const moduleConfig = PROSUITE_MODULES[module];
@@ -75,7 +81,9 @@ function calculateSummary(module: ModuleKey, data: Record<string, unknown[]>) {
   Object.values(data).forEach(records => {
     totalRecords += records.length;
     
-    records.forEach((record: any) => {
+    records.forEach(record => {
+      if (!isDataRecord(record)) return;
+
       // Count critical items
       if (record.priority === 'Critical' || record.severity === 'Critical' || 
           record.risk_level === 'Critical' || record.status === 'Critical') {
@@ -89,7 +97,8 @@ function calculateSummary(module: ModuleKey, data: Record<string, unknown[]>) {
       }
       
       // Count recent activity
-      const recordDate = new Date(record.created_at || record.date_occurred || record.start_date);
+      const rawDate = record.created_at || record.date_occurred || record.start_date;
+      const recordDate = new Date(typeof rawDate === 'string' ? rawDate : '');
       if (recordDate > weekAgo) {
         recentActivity++;
       }
@@ -112,25 +121,40 @@ export function buildAuditEvidenceContext(engagementId: number): {
   const policies = getCollection('governance.governance_policies');
   const controls = getCollection('risk.controls');
   const complianceControls = getCollection('compliance.compliance_packages');
+  const engagements = getCollection('audit.audit_engagements');
 
   // Identify missing documentation
   const missingEvidence: string[] = [];
+
+  const engagementExists = engagements.some(
+    engagement => isDataRecord(engagement) && engagement.id === engagementId
+  );
+  if (!engagementExists) {
+    missingEvidence.push(`Audit engagement ${engagementId} was not found`);
+  }
   
   // Check for risks without controls
-  const risksWithoutControls = risks.filter((r: any) => !r.control_id);
+  const risksWithoutControls = risks.filter(
+    risk => isDataRecord(risk) && !risk.control_id
+  );
   if (risksWithoutControls.length > 0) {
     missingEvidence.push(`${risksWithoutControls.length} risks without linked controls`);
   }
 
   // Check for controls without evidence
-  const controlsWithoutEvidence = controls.filter((c: any) => !c.evidence_url);
+  const controlsWithoutEvidence = controls.filter(
+    control => isDataRecord(control) && !control.evidence_url
+  );
   if (controlsWithoutEvidence.length > 0) {
     missingEvidence.push(`${controlsWithoutEvidence.length} controls without evidence documentation`);
   }
 
   // Check for policies due for review
-  const policiesDueReview = policies.filter((p: any) => {
-    const reviewDate = new Date(p.next_review_date);
+  const policiesDueReview = policies.filter(policy => {
+    if (!isDataRecord(policy) || typeof policy.next_review_date !== 'string') {
+      return false;
+    }
+    const reviewDate = new Date(policy.next_review_date);
     return reviewDate < new Date();
   });
   if (policiesDueReview.length > 0) {

@@ -6,11 +6,8 @@ import { buildModuleContext, buildScreenContext } from '../context/builder';
 import { createActionRequest, executeAction } from '../actions/handler';
 import { AIAction, ActionType } from '../actions/types';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true, // For client-side use
-});
+const apiKey = process.env.OPENAI_API_KEY;
+const openai = apiKey ? new OpenAI({ apiKey }) : null;
 
 export interface ChatMessage {
   id: string;
@@ -64,6 +61,14 @@ export class GRCAgent {
 
   // Process user message
   async chat(userMessage: string): Promise<AgentResponse> {
+    if (!openai) {
+      return {
+        message: 'The AI service is not configured.',
+        actions: [],
+        suggestions: this.getSuggestions(),
+      };
+    }
+
     // Build context
     const moduleContext = buildModuleContext(this.currentModule);
     const modulePrompt = MODULE_PROMPTS[this.currentModule];
@@ -128,7 +133,7 @@ export class GRCAgent {
         content: responseContent,
         timestamp: new Date().toISOString(),
         actions,
-        suggestions: this.generateContextualSuggestions(userMessage, responseContent),
+        suggestions: this.generateContextualSuggestions(userMessage),
       };
       this.conversationHistory.push(assistantChatMessage);
 
@@ -250,7 +255,7 @@ export class GRCAgent {
   }
 
   // Generate contextual suggestions based on conversation
-  private generateContextualSuggestions(userMessage: string, response: string): string[] {
+  private generateContextualSuggestions(userMessage: string): string[] {
     const baseSuggestions = this.getSuggestions();
     const contextual: string[] = [];
 

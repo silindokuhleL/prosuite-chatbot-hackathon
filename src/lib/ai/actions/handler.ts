@@ -3,6 +3,8 @@ import { createItem, updateItem, deleteItem, getCollection } from '@/lib/crud';
 import { AIAction, ActionRequest, ActionResult, APPROVAL_REQUIRED_ACTIONS } from './types';
 import { buildAuditEvidenceContext } from '../context/builder';
 
+type ActionRecord = { id: number } & Record<string, unknown>;
+
 // Generate unique action ID
 function generateActionId(): string {
   return `action_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -43,8 +45,9 @@ export async function executeAction(action: AIAction): Promise<ActionResult> {
         
       case 'update':
         const updateId = action.data.id as number;
-        const { id, ...updateData } = action.data;
-        result = updateItem(action.collection, updateId, updateData);
+        const updateData = { ...action.data };
+        delete updateData.id;
+        result = updateItem<ActionRecord>(action.collection, updateId, updateData);
         break;
         
       case 'delete':
@@ -55,7 +58,7 @@ export async function executeAction(action: AIAction): Promise<ActionResult> {
       case 'escalate':
         // Update priority/severity to critical
         const escalateId = action.data.id as number;
-        result = updateItem(action.collection, escalateId, { 
+        result = updateItem<ActionRecord>(action.collection, escalateId, {
           priority: 'Critical',
           escalated: true,
           escalated_at: new Date().toISOString(),
@@ -64,7 +67,7 @@ export async function executeAction(action: AIAction): Promise<ActionResult> {
         
       case 'assign':
         const assignId = action.data.id as number;
-        result = updateItem(action.collection, assignId, {
+        result = updateItem<ActionRecord>(action.collection, assignId, {
           assignee_id: action.data.assignee_id,
           assigned_at: new Date().toISOString(),
         });
@@ -117,7 +120,7 @@ export async function executeAction(action: AIAction): Promise<ActionResult> {
 
 // Search across collections
 function performSearch(collection: string, query: string): unknown[] {
-  const data = getCollection(collection);
+  const data = getCollection<Record<string, unknown>>(collection);
   const queryLower = query.toLowerCase();
   
   return data.filter((item: Record<string, unknown>) => {
@@ -143,10 +146,10 @@ function performAnalysis(module: string, params: Record<string, unknown>): Recor
   };
 
   const collections = collectionMap[module] || [];
-  const allData: Record<string, unknown[]> = {};
+  const allData: Record<string, Record<string, unknown>[]> = {};
   
   collections.forEach(col => {
-    allData[col] = getCollection(col);
+    allData[col] = getCollection<Record<string, unknown>>(col);
   });
 
   // Calculate metrics
