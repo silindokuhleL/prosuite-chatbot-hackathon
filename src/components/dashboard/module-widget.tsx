@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Icon } from '@/components/ui/icons';
-import { getModuleIcon } from '@/components/ui/icons';
+import { Icon, getModuleIconName } from '@/components/ui/icons';
 import type { ModuleConfig } from '@/types';
 
 interface ModuleWidgetProps {
@@ -17,7 +16,7 @@ interface ModuleWidgetProps {
 }
 
 export function ModuleWidget({ module, stats }: ModuleWidgetProps) {
-  const IconComponent = getModuleIcon(module.slug);
+  const iconName = getModuleIconName(module.slug);
 
   return (
     <Card className="group transition-shadow hover:shadow-md">
@@ -28,7 +27,7 @@ export function ModuleWidget({ module, stats }: ModuleWidgetProps) {
               className="flex h-10 w-10 items-center justify-center rounded-lg"
               style={{ backgroundColor: `${module.color}15`, color: module.color }}
             >
-              <IconComponent size={22} />
+              <Icon name={iconName} size={22} />
             </div>
             <div>
               <CardTitle className="text-base">{module.alias}</CardTitle>

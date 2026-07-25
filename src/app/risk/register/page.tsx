@@ -51,7 +51,6 @@ interface LookupItem {
 export default function RiskRegisterPage() {
   const [risks, setRisks] = useState<Risk[]>([]);
   const [categories, setCategories] = useState<LookupItem[]>([]);
-  const [riskTypes, setRiskTypes] = useState<LookupItem[]>([]);
   const [impactLevels, setImpactLevels] = useState<LookupItem[]>([]);
   const [likelihoodLevels, setLikelihoodLevels] = useState<LookupItem[]>([]);
   const [departments, setDepartments] = useState<LookupItem[]>([]);
@@ -65,20 +64,19 @@ export default function RiskRegisterPage() {
   const [selectedRisk, setSelectedRisk] = useState<Risk | null>(null);
   const [formData, setFormData] = useState<Partial<Risk>>({});
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   const loadData = () => {
     setRisks(getCollection<Risk>('risk.risks'));
     setCategories(getCollection<LookupItem>('risk.risk_categories'));
-    setRiskTypes(getCollection<LookupItem>('risk.risk_types'));
     setImpactLevels(getCollection<LookupItem>('risk.risk_impact_rating_levels'));
     setLikelihoodLevels(getCollection<LookupItem>('risk.risk_likelihood_rating_levels'));
     setDepartments(getCollection<LookupItem>('core.departments'));
     setUsers(getCollection<{ id: number; name: string }>('core.users'));
     setApproaches(getCollection<LookupItem>('risk.risk_approaches'));
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const getRiskScoreColor = (score: number) => {
     if (score >= 20) return '#dc2626';
@@ -208,7 +206,7 @@ export default function RiskRegisterPage() {
     setIsDeleteOpen(false);
   };
 
-  const RiskForm = ({ isNew = false }: { isNew?: boolean }) => (
+  const renderRiskForm = () => (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
@@ -362,7 +360,7 @@ export default function RiskRegisterPage() {
           <DialogHeader>
             <DialogTitle>Create New Risk</DialogTitle>
           </DialogHeader>
-          <RiskForm isNew />
+          {renderRiskForm()}
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
             <Button onClick={handleSaveNew} style={{ backgroundColor: PROSUITE_COLORS.risk.text }}>
@@ -379,7 +377,7 @@ export default function RiskRegisterPage() {
           <DialogHeader>
             <DialogTitle>Edit Risk: {selectedRisk?.title}</DialogTitle>
           </DialogHeader>
-          <RiskForm />
+          {renderRiskForm()}
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
             <Button onClick={handleSaveEdit} style={{ backgroundColor: PROSUITE_COLORS.risk.text }}>

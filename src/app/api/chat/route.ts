@@ -3,16 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import prosuiteData from '@/data/prosuite-data.json';
 
-// Validate API key exists
-const apiKey = process.env.OPENAI_API_KEY;
-if (!apiKey) {
-  console.error('OPENAI_API_KEY is not set in environment variables');
-}
-
-const openai = new OpenAI({
-  apiKey: apiKey || '',
-});
-
 // Build data context for AI from JSON
 function buildDataContext(module?: string) {
   const data = prosuiteData as Record<string, unknown>;
@@ -190,13 +180,15 @@ Be concise but thorough. Use emojis sparingly for status indicators (🔴🟠�
 
 export async function POST(request: NextRequest) {
   try {
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
         { error: 'OpenAI API key not configured' },
-        { status: 500 }
+        { status: 503 }
       );
     }
 
+    const openai = new OpenAI({ apiKey });
     const { messages, module, context } = await request.json();
 
     // Build data context from JSON - THIS IS THE KEY FIX

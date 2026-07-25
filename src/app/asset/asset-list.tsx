@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { DataTable } from '@/components/ui/data-table';
-import { Badge, StatusBadge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/badge';
 import { getAssets } from '@/lib/data';
 import type { Asset } from '@/types';
 

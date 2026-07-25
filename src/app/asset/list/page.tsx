@@ -53,8 +53,6 @@ export default function AssetListPage() {
   const [departments, setDepartments] = useState<LookupItem[]>([]);
   const [sites, setSites] = useState<LookupItem[]>([]);
   const [locations, setLocations] = useState<LookupItem[]>([]);
-  const [depreciationMethods, setDepreciationMethods] = useState<LookupItem[]>([]);
-  
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
@@ -194,7 +192,7 @@ export default function AssetListPage() {
     setIsDeleteOpen(false);
   };
 
-  const AssetForm = () => (
+  const renderAssetForm = () => (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
@@ -353,7 +351,7 @@ export default function AssetListPage() {
           <DialogHeader>
             <DialogTitle>Create New Asset</DialogTitle>
           </DialogHeader>
-          <AssetForm />
+          {renderAssetForm()}
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
             <Button onClick={handleSaveNew} style={{ backgroundColor: PROSUITE_COLORS.asset.text }}>
@@ -369,7 +367,7 @@ export default function AssetListPage() {
           <DialogHeader>
             <DialogTitle>Edit Asset: {selectedAsset?.assetTag}</DialogTitle>
           </DialogHeader>
-          <AssetForm />
+          {renderAssetForm()}
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
             <Button onClick={handleSaveEdit} style={{ backgroundColor: PROSUITE_COLORS.asset.text }}>
