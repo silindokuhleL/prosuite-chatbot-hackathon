@@ -24,12 +24,12 @@ export function RiskHeatmap() {
   };
 
   return (
-    <Card>
+    <Card className="min-w-0">
       <CardHeader>
         <CardTitle className="text-base">Risk Heatmap</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto">
+      <CardContent className="min-w-0">
+        <div className="max-w-full overflow-x-auto">
           <div className="min-w-[400px]">
             <div className="mb-2 flex items-end justify-center">
               <span className="text-xs font-medium text-muted-foreground">Impact →</span>
