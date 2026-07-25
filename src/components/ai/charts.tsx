@@ -232,8 +232,6 @@ export function SimplePieChart({ data, title, colorKey = 'module' }: SimplePieCh
     return MODULE_COLORS[index % MODULE_COLORS.length];
   };
 
-  const total = data.reduce((sum, d) => sum + d.value, 0);
-
   return (
     <div className="my-4 p-4 bg-white rounded-lg border shadow-sm">
       {title && <h4 className="text-sm font-semibold mb-3 text-gray-700">{title}</h4>}

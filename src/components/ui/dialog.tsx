@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { Icon } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 
 interface DialogProps {

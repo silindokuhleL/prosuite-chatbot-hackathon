@@ -179,17 +179,17 @@ export function Icon({ name, size = 20, className, ...props }: IconProps) {
   return <IconComponent size={size} className={className} {...props} />;
 }
 
-export function getModuleIcon(slug: string): LucideIcon {
-  const iconMap: Record<string, LucideIcon> = {
-    risk: ShieldAlert,
-    asset: Package,
-    compliance: Scale,
-    governance: Building2,
-    incident: AlertTriangle,
-    audit: ClipboardCheck,
-    performance: TrendingUp,
+export function getModuleIconName(slug: string): IconName {
+  const iconMap: Record<string, IconName> = {
+    risk: 'risk',
+    asset: 'asset',
+    compliance: 'compliance',
+    governance: 'governance',
+    incident: 'incident',
+    audit: 'audit',
+    performance: 'performance',
   };
-  return iconMap[slug] || LayoutDashboard;
+  return iconMap[slug] || 'dashboard';
 }
 
 export type { LucideIcon };
