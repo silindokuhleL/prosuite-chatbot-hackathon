@@ -17,8 +17,9 @@ Current status:
 - Module-aware quick suggestions: available.
 - Visual response triggers: available.
 - Browser screenshots: available.
-- Production build: currently failing on a TypeScript issue.
-- Lint: currently failing on React/TypeScript rule issues.
+- Production build: passing across all 57 application routes.
+- Lint: passing with zero errors and zero warnings.
+- Production dependency audit: zero known vulnerabilities.
 - Live AI response proof: not captured in this pass because it requires sending a prompt through the configured OpenAI account.
 
 ## Visual Proof
@@ -133,10 +134,10 @@ Install dependencies:
 npm install
 ```
 
-Create a local environment file:
+Create a local environment file from the safe template:
 
 ```bash
-touch .env.local
+cp .env.example .env.local
 ```
 
 Add your OpenAI key:
@@ -162,28 +163,28 @@ http://localhost:3000
 
 ## Verification Notes
 
-Latest local proof pass: 2026-07-09.
+Latest local proof pass: 2026-07-25.
 
 Passed:
 
-- `npm install` completed.
+- `npm install` completed on Node.js 20.9 or newer.
+- `npm run lint` passed with zero errors and zero warnings.
+- `npm run build` compiled, type-checked, and generated all 57 routes.
+- `npm audit --omit=dev` reports zero production vulnerabilities.
 - Dev server rendered locally on `http://localhost:3109`.
 - Browser verified dashboard content, module navigation, risk heatmap, metrics, and recent activity.
 - Browser verified the Mazwi chat panel opens and shows module-aware risk suggestions.
 
 Needs work:
 
-- `npm run lint` currently fails.
-- `npm run build` currently fails.
-- npm audit reports 9 vulnerabilities.
+- The development toolchain audit still reports seven transitive advisories; production dependencies are clean.
 - Live AI response proof still needs a safe demo run with an approved OpenAI key and non-sensitive prompt.
 
 ## Known Gaps
 
-- Build fails in `src/lib/ai/actions/handler.ts` because escalation update data does not match the current generic `updateItem` type.
-- Lint fails on React compiler rules such as synchronous state updates in effects and static component rules across several pages.
 - Some AI action services are proof-of-concept helpers around local JSON data, not production persistence.
 - Sensitive data masking, cross-tenant isolation, and long-term RAG memory are still listed as pending/future work.
+- Live assistant responses require `OPENAI_API_KEY`; without it, `/api/chat` returns a controlled `503` response.
 
 ## Portfolio Summary
 
